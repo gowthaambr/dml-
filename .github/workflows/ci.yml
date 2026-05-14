@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-airflow:
+    runs-on: ubuntu-latest
+    env:
+      AIRFLOW_UID: 50000
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Compose services
+        run: docker compose -f docker-compose.yaml build
+
+      - name: Start Docker Compose stack
+        run: docker compose -f docker-compose.yaml up -d
+
+      - name: Validate Airflow DAGs
+        run: docker compose -f docker-compose.yaml exec -T airflow-webserver airflow dags list
